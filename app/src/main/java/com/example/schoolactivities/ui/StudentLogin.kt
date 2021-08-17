@@ -8,6 +8,8 @@ import android.widget.Toast
 import com.example.schoolactivities.R
 import com.example.schoolactivities.api.ApiClient
 import com.example.schoolactivities.api.ApiInterface
+import com.example.schoolactivities.databinding.ActivityMainBinding
+import com.example.schoolactivities.databinding.ActivityStudentLoginBinding
 import com.example.schoolactivities.model.LoginRequest
 import com.example.schoolactivities.model.LoginResponse
 import org.json.JSONObject
@@ -18,36 +20,37 @@ import java.lang.Exception
 
 
 class StudentLogin : AppCompatActivity() {
-    lateinit var tvEmail:EditText
-    lateinit var tvPassword:EditText
-    lateinit var btnLogin: Button
+//    lateinit var tvEmail:EditText
+//    lateinit var tvPassword:EditText
+//    lateinit var btnLogin: Button
+lateinit var binding: ActivityStudentLoginBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_student_login)
-        display()
-    }
-    fun display(){
-        tvEmail=findViewById(R.id.etEmailLogin)
-        tvPassword=findViewById(R.id.etLoginPassword)
-        btnLogin=findViewById(R.id.btLogin)
 
     }
+//    fun display(){
+////        tvEmail=findViewById(R.id.etEmailLogin)
+////        tvPassword=findViewById(R.id.etLoginPassword)
+////        btnLogin=findViewById(R.id.btLogin)
+//
+//    }
     fun login(){
-        btnLogin.setOnClickListener {
-            var email=tvEmail.text.toString()
+       binding.btLogin.setOnClickListener {
+            var email=binding.etEmailLogin.toString()
             if (email.isEmpty()){
                 var error=true
-                tvEmail.setError("Email is required")
+                binding.etEmailLogin.setError("Email is required")
             }
-            var password=tvPassword.text.toString()
+            var password=binding.etLoginPassword.toString()
             if (password.isEmpty()){
                 var error=true
-                tvPassword.setError("Enter correct password")
+                binding.etLoginPassword.setError("Enter correct password")
                 var loginRequest=LoginRequest(email = email,password = password)
-                var retrofit=ApiClient.buildApiClient(ApiInterface::class.java)
-                var request=retrofit.loginStudent( loginRequest)
-                request.enqueue(object : Callback<LoginResponse>{
-                    override fun onResponse(
+//                var retrofit=ApiClient.buildApiClient(ApiInterface::class.java)
+//                var request=retrofit.loginStudent( loginRequest)
+//                request.enqueue(object : Callback<LoginResponse>{
+                     fun onResponse(
                         call: Call<LoginResponse>,
                         response: Response<LoginResponse>
                     ) {
@@ -64,14 +67,13 @@ class StudentLogin : AppCompatActivity() {
                         }
                     }
 
-                    override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                     fun onFailure(call: Call<LoginResponse>, t: Throwable) {
                         Toast.makeText(baseContext,t.message,Toast.LENGTH_LONG).show()
                     }
 
-                })
+                }
 //
           }
        }
    }
 
-}

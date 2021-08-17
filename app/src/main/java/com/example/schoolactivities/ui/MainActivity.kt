@@ -1,12 +1,18 @@
 package com.example.schoolactivities
 
+import android.content.Intent
+import android.os.Binder
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.*
+import androidx.activity.viewModels
+import androidx.core.view.isEmpty
 import com.example.schoolactivities.api.ApiClient
 import com.example.schoolactivities.api.ApiInterface
+import com.example.schoolactivities.databinding.ActivityMainBinding
 import com.example.schoolactivities.model.RegistrationRequest
 import com.example.schoolactivities.model.RegistrationResponse
+import com.example.schoolactivities.ui.StudentLogin
 import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
@@ -14,59 +20,86 @@ import retrofit2.Response
 import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
-    lateinit var etName:EditText
-    lateinit var etEmail: EditText
-    lateinit var spGender:Spinner
-    lateinit var spNationality:Spinner
-    lateinit var etPhone:EditText
-    lateinit var etId:EditText
-    lateinit var etDob:EditText
-    lateinit var etPassword:EditText
+    lateinit var binding: ActivityMainBinding
+    val userViewModel:UserViewModel by viewModels()
     lateinit var btnRegister:Button
+//    lateinit var etName:EditText
+//    lateinit var etEmail: EditText
+//    lateinit var spGender:Spinner
+//    lateinit var spNationality:Spinner
+//    lateinit var etPhone:EditText
+//    lateinit var etId:EditText
+//    lateinit var etDob:EditText
+//    lateinit var etPassword:EditText
+//    lateinit var btnRegister:Button
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+    binding= ActivityMainBinding.inflate(layoutInflater)
         setContentView(R.layout.activity_main)
-        castView()
-        clickRegister()
-    }
-    fun castView(){
-        etName=findViewById(R.id.etName)
-        etEmail=findViewById(R.id.etEmail)
-        spGender=findViewById(R.id.spGender)
-        spNationality=findViewById(R.id.spNationality)
-        etId=findViewById(R.id.etId)
-        etPhone=findViewById(R.id.etPhone)
-        etDob=findViewById(R.id.etDoB)
-        etPassword=findViewById(R.id.etPassword)
+
+    spinner()
+    clickRegister()
+ }
+ fun spinner(){
 
         var nationalities= arrayOf("Kenyan","Ugandan","South Sudanese","Sudanese","Rwandan")
         var nationalitiesAdapter=ArrayAdapter(this,android.R.layout.simple_selectable_list_item,nationalities)
         nationalitiesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spNationality.adapter=nationalitiesAdapter
+        binding.spNationality.adapter=nationalitiesAdapter
     }
-    fun  clickRegister(){
-        var error=false
+    fun  clickRegister() {
+        var error = false
         btnRegister.setOnClickListener {
-            var name=etName.text.toString()
-            if (name.isEmpty()){
-                error=true
-                etName.setError("Name is required")
-            }
-            var dob=etDob.text.toString()
-            var nationality=spNationality.selectedItem.toString()
-            var password=etPassword.text.toString()
-            var phone=etPhone.text.toString()
-            var email=etEmail.text.toString()
-            if (email.isEmpty()){
-                error=true
-                etEmail.setError("Email is required ")
-            }
-            var registrationRequest= RegistrationRequest(name=name,phoneNumber = phone,email=email,nationality = nationality.uppercase(),dateOfBirth = dob,password = password)
+            var error=false
+            var name = binding.etName.toString()
+            if (name.isEmpty()) {
+                error = true
 
-            var retrofit= ApiClient.buildApiClient(ApiInterface::class.java)
-            var request=retrofit.registerStudent( registrationRequest)
-            request.enqueue(object : Callback<RegistrationResponse> {
-                override fun onResponse(
+                binding.etName.setError("Name is required")
+            }
+//            var dob = binding.etDoB
+//            var nationality = binding.spNationality
+//            var password = binding.etPassword
+//            var phone = binding.etP
+            if (name.isEmpty()) {
+                error = true
+
+                binding.etName.setError("Name is required")
+            }
+            var dob = binding.etDoB.toString()
+            if (dob.isEmpty()) {
+                error = true
+                binding.etDoB.setError("Date of birth is required ")
+            }
+            var nationality = ""
+            var password = binding.etPassword.toString()
+            if (password.isEmpty()) {
+                error = true
+                binding.etEmail.setError("Password is required ")
+            }
+            var phone = binding.etPhone.toString()
+            if (phone.isEmpty()) {
+                error = true
+                binding.etEmail.setError("Phone number is required ")
+            }
+            var email = binding.etEmail.toString()
+            if (email.isEmpty()) {
+                error = true
+                binding.etEmail.setError("Email is required ")
+            }
+            var registrationRequest = RegistrationRequest(
+               name = name,phoneNumber = phone,email = email,dateOfBirth = dob,nationality = nationality,password = password
+
+            )
+//            var retrofit= ApiClient.buildApiClient(ApiInterface::class.java)
+//            var request=retrofit.registerStudent( registrationRequest)
+//            request.enqueue(object : Callback<RegistrationResponse> {
+//        }
+            userViewModel.registerUser(registrationRequest)
+            val intent=Intent(baseContext,StudentLogin::class.java)
+            startActivity(intent)
+    }
+     fun onResponse(
                     call: Call<RegistrationResponse>,
                     response: Response<RegistrationResponse>
                 ) {
@@ -83,12 +116,10 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                override fun onFailure(call: Call<RegistrationResponse>, t: Throwable) {
+                 fun onFailure(call: Call<RegistrationResponse>, t: Throwable) {
                     Toast.makeText(baseContext,t.message,Toast.LENGTH_LONG).show()
                 }
 
-            })
-        }
-    }
+            }
 }
 data class ApiError(var errors:List<String>)
